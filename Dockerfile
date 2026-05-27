@@ -1,5 +1,5 @@
 # Minimal multi-stage Dockerfile for Maven-built Spring Boot app (Java 8) compatible with podman
-FROM maven:3.8.8-openjdk-8 AS build
+FROM maven:3.8.8-jdk-8 AS build
 WORKDIR /src
 COPY pom.xml .
 COPY src ./src
