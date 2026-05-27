@@ -1,15 +1,14 @@
-# Minimal multi-stage Dockerfile for a Maven-built Spring Boot app (Java 8)
-# Build stage: use official Maven with OpenJDK 8
+# Minimal multi-stage Dockerfile for Maven-built Spring Boot app (Java 8) compatible with podman
 FROM maven:3.8.8-openjdk-8 AS build
 WORKDIR /src
 COPY pom.xml .
 COPY src ./src
-# Package application (skip tests to keep build fast)
-RUN mvn -DskipTests package -q
+# Use batch mode and skip tests for non-interactive builds
+RUN mvn -B -DskipTests package -q
 
-# Runtime stage: slim JRE
 FROM openjdk:8-jre-slim
-ARG JAR=practical-0.0.1-SNAPSHOT.jar
-COPY --from=build /src/target/${JAR} /app/app.jar
+WORKDIR /app
+# Copy any produced jar from the build stage (supports varying jar names)
+COPY --from=build /src/target/*.jar /app/app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
